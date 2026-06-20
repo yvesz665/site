@@ -13,11 +13,10 @@ if (!function_exists('h')) {
     }
 }
 
-$restaurantId      = (int) $_SESSION['restaurant_id'];
-$erreurs           = [];
-$restaurant        = getRestaurantData();
-$whatsappRestaurant = trim((string) ($restaurant['whatsapp_numero'] ?? ''));
-$nomRestaurant     = (string) ($restaurant['nom'] ?? '');
+$restaurantId  = (int) $_SESSION['restaurant_id'];
+$erreurs       = [];
+$restaurant    = getRestaurantData();
+$nomRestaurant = (string) ($restaurant['nom'] ?? '');
 
 // -----------------------------------------------------------------------
 // Sélection et validation de la date
@@ -256,9 +255,6 @@ $csrfToken = generateCsrfToken();
                     $heure         = substr((string) $res['heure_reservation'], 0, 5);
                     $actionsDispos = $actionsParStatut[$statut] ?? [];
 
-                    // Flux A : lien vers le numéro du restaurant (notification interne)
-                    $lienWaRestaurant = buildWhatsappRestaurantNotifLink($res, $whatsappRestaurant);
-
                     // Flux B : lien vers le téléphone du client — uniquement si statut final
                     $lienWaClient = null;
                     if (in_array($statut, ['confirmee', 'annulee'], true)) {
@@ -309,35 +305,9 @@ $csrfToken = generateCsrfToken();
                         </div>
                     <?php endif; ?>
 
-                    <!-- ================================================
-                         Notifications WhatsApp (liens wa.me, clic manuel)
-                         target="_blank" + rel="noopener noreferrer" :
-                           noopener   → empêche la page ouverte d'accéder à
-                                        window.opener (sécurité onglet parent).
-                           noreferrer → supprime l'en-tête Referer envoyé à
-                                        wa.me (confidentialité de l'URL admin).
-                                        Implique noopener dans les navigateurs modernes.
-                    ================================================== -->
-                    <div class="res-whatsapp">
-
-                        <!-- Flux A : notifier le restaurateur / son équipe -->
-                        <?php if ($lienWaRestaurant !== null): ?>
-                            <a href="<?= h($lienWaRestaurant) ?>"
-                               class="btn-sm btn-wa-resto"
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               title="Ouvre WhatsApp avec un récapitulatif vers votre numéro de restaurant">
-                                Me notifier sur WhatsApp
-                            </a>
-                        <?php else: ?>
-                            <span class="res-wa-hint">
-                                <a href="/admin/restaurant.php#whatsapp_numero">Configurer un n° WhatsApp</a>
-                                pour activer les notifs internes.
-                            </span>
-                        <?php endif; ?>
-
-                        <!-- Flux B : notifier le client (uniquement statuts confirmee / annulee) -->
-                        <?php if ($lienWaClient !== null): ?>
+                    <!-- Flux B : notifier le client de la confirmation / annulation -->
+                    <?php if ($lienWaClient !== null): ?>
+                        <div class="res-whatsapp">
                             <a href="<?= h($lienWaClient) ?>"
                                class="btn-sm btn-wa-client"
                                target="_blank"
@@ -345,9 +315,8 @@ $csrfToken = generateCsrfToken();
                                title="Ouvre WhatsApp avec un message destiné au client de cette réservation">
                                 Notifier le client sur WhatsApp
                             </a>
-                        <?php endif; ?>
-
-                    </div>
+                        </div>
+                    <?php endif; ?>
 
                 </div>
                 <?php endforeach; ?>

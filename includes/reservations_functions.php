@@ -125,59 +125,6 @@ function waNormaliserNumero(string $telephone): ?string
 }
 
 // ------------------------------------------------------------
-// Flux A — Notification interne (restaurateur → son propre numéro)
-// ------------------------------------------------------------
-
-/**
- * Construit un lien wa.me pour que le restaurateur se notifie lui-même
- * d'une nouvelle réservation (Flux A).
- *
- * Le lien ouvre WhatsApp avec un message récapitulatif pré-rempli, destiné
- * au numéro WhatsApp du restaurant. Le restaurateur doit cliquer "Envoyer"
- * lui-même — ce n'est PAS un envoi automatique silencieux.
- *
- * Pourquoi rawurlencode() sur le texte du message :
- *   Le paramètre ?text= fait partie d'une URL. Tous les caractères non-ASCII
- *   (accents : é, à, ê…), les espaces et les retours à la ligne (\n → %0A)
- *   doivent être convertis en séquences %XX pour que l'URL soit valide et que
- *   WhatsApp recompose correctement le texte. rawurlencode() encode les espaces
- *   en %20 (RFC 3986), plus correct qu'urlencode() qui produit + à la place.
- *
- *   Distinction des deux échappements :
- *   - rawurlencode() → chaîne valide dans une URL (paramètre HTTP).
- *   - htmlspecialchars() → chaîne sûre dans du HTML (valeur d'attribut href).
- *   Ces deux fonctions sont complémentaires : l'URL retournée ici doit ensuite
- *   passer dans htmlspecialchars() avant d'être insérée dans un href="".
- *
- * @param array  $reservation    Ligne complète de la table reservations
- * @param string $whatsappNumero Numéro du restaurant (peut être non normalisé)
- * @return string|null  URL wa.me prête à l'emploi, ou null si numéro inutilisable
- */
-function buildWhatsappRestaurantNotifLink(array $reservation, string $whatsappNumero): ?string
-{
-    $numero = waNormaliserNumero($whatsappNumero);
-    if ($numero === null) {
-        return null;
-    }
-
-    $date  = waFormatDateFr((string) ($reservation['date_reservation']  ?? ''));
-    $heure = substr((string) ($reservation['heure_reservation'] ?? ''), 0, 5);
-    $nb    = (int) ($reservation['nombre_personnes'] ?? 0);
-
-    $texte  = "Nouvelle réservation :\n";
-    $texte .= "Nom : "       . ($reservation['nom_client']       ?? '') . "\n";
-    $texte .= "Tél : "       . ($reservation['telephone_client'] ?? '') . "\n";
-    $texte .= "Date : "      . $date                                    . "\n";
-    $texte .= "Heure : "     . $heure                                   . "\n";
-    $texte .= "Personnes : " . $nb;
-    if (!empty($reservation['notes'])) {
-        $texte .= "\nNotes : " . $reservation['notes'];
-    }
-
-    return 'https://wa.me/' . $numero . '?text=' . rawurlencode($texte);
-}
-
-// ------------------------------------------------------------
 // Flux B — Notification client (restaurateur → téléphone du client)
 // ------------------------------------------------------------
 
@@ -234,6 +181,83 @@ function buildWhatsappClientNotifLink(
         $texte .= " prévue le " . $date . " à " . $heure . " n'a pas pu être maintenue.\n\n";
         $texte .= "N'hésitez pas à nous contacter pour prévoir une nouvelle date.\n\n";
         $texte .= "Cordialement" . ($nomRestaurant !== '' ? ",\n" . $nomRestaurant : '.');
+    }
+
+    return 'https://wa.me/' . $numero . '?text=' . rawurlencode($texte);
+}
+
+// ------------------------------------------------------------
+// Flux A (nouveau) — Client → Restaurant, déclenché côté public
+// ------------------------------------------------------------
+
+/**
+ * Construit un lien wa.me pour que le CLIENT envoie un message WhatsApp
+ * au restaurant juste après avoir validé sa réservation en ligne (nouveau Flux A).
+ *
+ * CONTEXTE D'UTILISATION — implémentation à venir, pas encore réalisée :
+ *   Cette fonction sera appelée depuis la page publique de réservation
+ *   (public/reservation.php, à créer), juste après l'insertion réussie de
+ *   la réservation en base de données.
+ *
+ *   Mécanisme prévu côté serveur + navigateur :
+ *     1. Le formulaire public est soumis (POST).
+ *     2. Le serveur valide, insère en base, appelle cette fonction.
+ *     3. L'URL retournée est transmise à la page de confirmation (via session
+ *        ou variable PHP rendue dans le HTML).
+ *     4. Côté navigateur, JavaScript ouvre automatiquement un nouvel onglet :
+ *            window.open(lienWhatsapp, '_blank', 'noopener,noreferrer');
+ *        Si window.open est bloqué (popup blocker), afficher un bouton
+ *        cliquable "Envoyer un message au restaurant" pointant vers l'URL.
+ *
+ *   Caractère non bloquant :
+ *     Si le client ferme l'onglet WhatsApp sans envoyer, ou n'a pas WhatsApp,
+ *     la réservation reste valable — ce mécanisme est un bonus de notification,
+ *     jamais une condition pour que la réservation soit prise en compte.
+ *
+ * RÔLE DU MESSAGE :
+ *   Rédigé à la première personne, comme si le client l'envoyait lui-même.
+ *   Le client lit le message pré-rempli dans WhatsApp et clique "Envoyer".
+ *   Ce n'est PAS un envoi automatique silencieux.
+ *
+ * PARAMÈTRE $donneesFormulaireReservation :
+ *   Tableau associatif des données validées issues du formulaire public,
+ *   PAS une ligne relue depuis la base. On utilise les données POST validées
+ *   pour éviter une requête SELECT supplémentaire juste après l'INSERT.
+ *   Clés attendues :
+ *     - nom_client         (string)
+ *     - telephone_client   (string)
+ *     - date_reservation   (string, format YYYY-MM-DD)
+ *     - heure_reservation  (string, format HH:MM ou HH:MM:SS)
+ *     - nombre_personnes   (int|string)
+ *     - notes              (string, optionnel)
+ *
+ * @param array  $donneesFormulaireReservation  Données validées du formulaire public
+ * @param string $whatsappNumero  Numéro WhatsApp du restaurant (peut être non normalisé)
+ * @return string|null  URL wa.me prête à l'emploi, ou null si numéro non renseigné/invalide
+ */
+function buildWhatsappClientToRestaurantLink(
+    array  $donneesFormulaireReservation,
+    string $whatsappNumero
+): ?string {
+    $numero = waNormaliserNumero($whatsappNumero);
+    if ($numero === null) {
+        return null;
+    }
+
+    $nom   = (string) ($donneesFormulaireReservation['nom_client']       ?? '');
+    $tel   = (string) ($donneesFormulaireReservation['telephone_client'] ?? '');
+    $date  = waFormatDateFr((string) ($donneesFormulaireReservation['date_reservation']  ?? ''));
+    $heure = substr((string) ($donneesFormulaireReservation['heure_reservation'] ?? ''), 0, 5);
+    $nb    = (int) ($donneesFormulaireReservation['nombre_personnes'] ?? 0);
+    $notes = (string) ($donneesFormulaireReservation['notes'] ?? '');
+
+    $texte  = "Bonjour, je viens de réserver une table";
+    $texte .= " pour " . $nb . " personne" . ($nb > 1 ? 's' : '');
+    $texte .= " le " . $date . " à " . $heure . ".\n";
+    $texte .= "Mon nom : " . $nom . ".\n";
+    $texte .= "Tél : " . $tel . ".";
+    if ($notes !== '') {
+        $texte .= "\nNotes : " . $notes;
     }
 
     return 'https://wa.me/' . $numero . '?text=' . rawurlencode($texte);
