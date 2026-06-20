@@ -1241,3 +1241,197 @@ input[type="file"] {
 .res-wa-hint a {
     color: #b08055;
 }
+
+/* ============================================================
+   Commandes (admin/commandes.php)
+============================================================= */
+
+.commandes-count {
+    font-size: 0.85rem;
+    color: #888;
+    margin: 0 0 1rem;
+}
+
+.commandes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Carte commande — bordure gauche colorée par statut */
+.commande-card {
+    background: #fff;
+    border: 1px solid #ece8e0;
+    border-left: 4px solid #ccc;
+    border-radius: 6px;
+    padding: 0.9rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.commande-card--en_attente     { border-left-color: #c8c0b4; }
+.commande-card--confirmee      { border-left-color: #90caf9; }
+.commande-card--en_preparation { border-left-color: #ffb74d; }
+.commande-card--prete          { border-left-color: #81c784; }
+.commande-card--livree         { border-left-color: #4db6ac; }
+.commande-card--annulee        { border-left-color: #ef9a9a; }
+
+/* En-tête : heure · badge · mode · total */
+.cmd-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.cmd-time {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #3a3028;
+    min-width: 2.8rem;
+}
+
+/* Badges de statut — nouveaux statuts (en_attente/confirmee/annulee réutilisés depuis reservations) */
+.badge-statut--en_preparation {
+    background: #fff3e0;
+    color: #bf6000;
+    border: 1px solid #ffcc80;
+}
+.badge-statut--prete {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+.badge-statut--livree {
+    background: #e0f2f1;
+    color: #00695c;
+    border: 1px solid #80cbc4;
+}
+
+/* Badge mode : sur_place / livraison */
+.cmd-mode-badge {
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    font-weight: 500;
+    border: 1px solid transparent;
+}
+.cmd-mode-badge--sur_place {
+    background: #f5f0e8;
+    color: #7a6040;
+    border-color: #d8cbb8;
+}
+.cmd-mode-badge--livraison {
+    background: #e8eaf6;
+    color: #3949ab;
+    border-color: #9fa8da;
+}
+
+.cmd-total {
+    margin-left: auto;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #3a3028;
+}
+
+/* Infos client */
+.cmd-body {
+    font-size: 0.9rem;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+.cmd-client-name {
+    font-weight: 600;
+    color: #3a3028;
+}
+.cmd-tel {
+    color: #888;
+}
+
+/* Adresse de livraison */
+.cmd-adresse {
+    font-size: 0.85rem;
+    color: #3949ab;
+    background: #e8eaf6;
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+}
+
+/* Détail des lignes — <details> natif HTML5, zéro JS */
+.cmd-detail {
+    margin-top: 0.2rem;
+}
+
+.cmd-detail-summary {
+    font-size: 0.82rem;
+    color: #888;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    padding: 0.2rem 0;
+    list-style: disclosure-closed;
+}
+.cmd-detail[open] .cmd-detail-summary {
+    color: #5c4a2a;
+    list-style: disclosure-open;
+}
+
+/* Tableau des lignes de commande */
+.cmd-lignes-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.6rem;
+    font-size: 0.83rem;
+}
+.cmd-lignes-table th,
+.cmd-lignes-table td {
+    padding: 0.35rem 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid #f0ede6;
+}
+.cmd-lignes-table th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #aaa;
+    font-weight: 600;
+    background: #faf9f7;
+}
+.cmd-lignes-table .col-num {
+    text-align: right;
+    white-space: nowrap;
+}
+.cmd-lignes-table tbody tr:last-child td {
+    border-bottom: none;
+}
+.cmd-lignes-total td {
+    font-weight: 600;
+    color: #3a3028;
+    border-top: 2px solid #e0ddd6;
+    border-bottom: none;
+}
+
+/* Formulaire de changement de statut */
+.cmd-statut-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.4rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid #f0ede6;
+}
+
+.select-statut {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid #d0c8bc;
+    border-radius: 4px;
+    background: #faf9f7;
+    color: #3a3028;
+    cursor: pointer;
+}
