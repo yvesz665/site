@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS `restaurant` (
                              COMMENT 'Code hexadécimal (#RRGGBB)',
     `adresse`            VARCHAR(500)     NULL DEFAULT NULL,
     `telephone`          VARCHAR(20)      NULL DEFAULT NULL,
+    `whatsapp_numero`    VARCHAR(20)      NULL DEFAULT NULL
+                             COMMENT 'Numéro WhatsApp au format international sans + (ex: 22670000000). Utilisé pour les liens wa.me du Flux A (notification interne réservation).',
     `email`              VARCHAR(255)     NULL DEFAULT NULL,
     -- Choix JSON pour horaires : permet une représentation structurée par jour
     -- ex: {"lundi":{"ouvert":true,"debut":"11:30","fin":"22:00"}, "mardi":{...}, ...}

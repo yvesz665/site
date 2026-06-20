@@ -73,12 +73,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $restaurant !== null) {
         $email     = trim($_POST['email']     ?? '');
         $couleur   = trim($_POST['couleur_principale'] ?? '#FF6B35');
 
+        // Numéro WhatsApp : on ne garde que les chiffres (l'utilisateur peut taper "226 70 00 00 00")
+        $whatsappNumero = preg_replace('/\D/', '', trim($_POST['whatsapp_numero'] ?? ''));
+
         // Validation des champs obligatoires
         if ($nom === '')       $erreurs[] = 'Le nom du restaurant est obligatoire.';
         if ($adresse === '')   $erreurs[] = 'L\'adresse est obligatoire.';
         if ($telephone === '') $erreurs[] = 'Le numéro de téléphone est obligatoire.';
         if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $erreurs[] = 'L\'adresse email n\'est pas valide.';
+        }
+        // Numéro WhatsApp : optionnel, mais si renseigné doit respecter la plage E.164 (7-15 chiffres)
+        if ($whatsappNumero !== '' && (strlen($whatsappNumero) < 7 || strlen($whatsappNumero) > 15)) {
+            $erreurs[] = 'Le numéro WhatsApp doit contenir entre 7 et 15 chiffres '
+                . '(format international sans +, ex : 22670000000).';
         }
         // Couleur hexadécimale : remet la valeur par défaut si invalide
         if (!preg_match('/^#[0-9A-Fa-f]{6}$/', $couleur)) {
@@ -151,7 +159,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $restaurant !== null) {
                 $stmt = getDB()->prepare(
                     'UPDATE restaurant
                      SET nom = ?, adresse = ?, telephone = ?, email = ?,
-                         couleur_principale = ?, horaires = ?, logo_path = ?
+                         couleur_principale = ?, horaires = ?, logo_path = ?,
+                         whatsapp_numero = ?
                      WHERE id = ?'
                 );
                 $stmt->execute([
@@ -162,6 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $restaurant !== null) {
                     $couleur,
                     json_encode($horairesPost, JSON_UNESCAPED_UNICODE),
                     $logoPath,
+                    $whatsappNumero !== '' ? $whatsappNumero : null,
                     $restaurant['id'],
                 ]);
 
@@ -186,12 +196,13 @@ $r         = $restaurant ?? [];
 
 // Valeurs à afficher dans le formulaire (données rechargées depuis la base si succès,
 // données POST sinon pour conserver ce que l'utilisateur avait saisi)
-$valNom      = h((string) ($r['nom']       ?? ''));
-$valAdresse  = h((string) ($r['adresse']   ?? ''));
-$valTel      = h((string) ($r['telephone'] ?? ''));
-$valEmail    = h((string) ($r['email']     ?? ''));
+$valNom      = h((string) ($r['nom']              ?? ''));
+$valAdresse  = h((string) ($r['adresse']          ?? ''));
+$valTel      = h((string) ($r['telephone']        ?? ''));
+$valEmail    = h((string) ($r['email']            ?? ''));
 $valCouleur  = h((string) ($r['couleur_principale'] ?? '#FF6B35'));
-$valLogoPath = (string) ($r['logo_path'] ?? '');
+$valLogoPath = (string) ($r['logo_path']            ?? '');
+$valWhatsapp = h((string) ($r['whatsapp_numero']  ?? ''));
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -270,6 +281,22 @@ $valLogoPath = (string) ($r['logo_path'] ?? '');
                                value="<?= $valEmail ?>"
                                maxlength="255" autocomplete="email">
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="whatsapp_numero">
+                        WhatsApp <span class="hint">optionnel — notifications réservations</span>
+                    </label>
+                    <input type="tel" id="whatsapp_numero" name="whatsapp_numero"
+                           value="<?= $valWhatsapp ?>"
+                           maxlength="15"
+                           placeholder="22670000000">
+                    <p class="field-help">
+                        Format international sans le + ni les espaces.
+                        Exemple : <strong>22670000000</strong> (Burkina Faso),
+                        <strong>33612345678</strong> (France).
+                        Ce numéro recevra les notifications de réservation.
+                    </p>
                 </div>
 
                 <div class="form-group">

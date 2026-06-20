@@ -670,3 +670,574 @@ input[type="file"] {
     font-style: italic;
     padding: 1rem 0;
 }
+
+/* ============================================================
+   Plats — layout large, filtre, tableau, galerie photos
+   ============================================================ */
+
+.panel-card-lg {
+    max-width: 980px;
+}
+
+/* Filtre catégorie */
+.filtre-form {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filtre-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #555;
+}
+
+.filtre-select {
+    padding: 0.45rem 0.75rem;
+    border: 1px solid #d4d0c8;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: #2d2d2d;
+    background: #faf9f7;
+    cursor: pointer;
+}
+
+.filtre-select:focus {
+    outline: none;
+    border-color: #c0784a;
+    box-shadow: 0 0 0 3px rgba(192, 120, 74, 0.15);
+}
+
+/* Actions côté droit du panel-header */
+.panel-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* Bouton "Ajouter un plat" dans le header */
+.btn-add-plat {
+    background-color: #c0784a;
+    border-color: #c0784a;
+    color: #fff;
+    padding: 0.4rem 1rem;
+    font-weight: 600;
+}
+
+.btn-add-plat:hover {
+    background-color: #a8623b;
+    border-color: #a8623b;
+    color: #fff;
+}
+
+/* Colonne photo dans le tableau */
+.col-photo {
+    width: 72px;
+}
+
+.plat-thumb {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #e0ddd6;
+    display: block;
+}
+
+.plat-thumb-vide {
+    width: 56px;
+    height: 56px;
+    border-radius: 6px;
+    background: #f0ede6;
+    border: 1px solid #e0ddd6;
+}
+
+.plats-table .col-categorie {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.plats-table .col-prix {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    width: 95px;
+}
+
+.plats-table .col-dispo {
+    width: 80px;
+    text-align: center;
+}
+
+.plats-table .col-actions {
+    width: 155px;
+    white-space: nowrap;
+}
+
+/* Badges disponibilité (bouton toggle) */
+.badge-toggle {
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.25rem 0.7rem;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.badge-dispo {
+    background-color: #edfaf3;
+    border-color: #a8dfc0;
+    color: #1a5c38;
+}
+
+.badge-dispo:hover {
+    background-color: #d6f0e4;
+}
+
+.badge-indispo {
+    background-color: #f5f4f0;
+    border-color: #d4d0c8;
+    color: #888;
+}
+
+.badge-indispo:hover {
+    background-color: #e8e4dc;
+}
+
+/* ---------------------------------------------------------------
+   Formulaire plat — champs supplémentaires (textarea, select)
+--------------------------------------------------------------- */
+
+.form-group textarea {
+    display: block;
+    width: 100%;
+    padding: 0.6rem 0.85rem;
+    border: 1px solid #d4d0c8;
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #2d2d2d;
+    background: #faf9f7;
+    resize: vertical;
+    font-family: inherit;
+    line-height: 1.5;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #c0784a;
+    box-shadow: 0 0 0 3px rgba(192, 120, 74, 0.15);
+    background: #fff;
+}
+
+.form-group select {
+    display: block;
+    width: 100%;
+    padding: 0.6rem 0.85rem;
+    border: 1px solid #d4d0c8;
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #2d2d2d;
+    background: #faf9f7;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #c0784a;
+    box-shadow: 0 0 0 3px rgba(192, 120, 74, 0.15);
+    background: #fff;
+}
+
+/* Checkbox disponible */
+.label-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #444;
+}
+
+.label-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #c0784a;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------
+   Galerie photos (mode édition plat)
+--------------------------------------------------------------- */
+
+.photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.photo-item {
+    border: 1px solid #e8e4dc;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #faf9f7;
+}
+
+.photo-item.photo-principale {
+    border-color: #c0784a;
+    box-shadow: 0 0 0 2px rgba(192, 120, 74, 0.15);
+}
+
+.photo-preview-wrap {
+    position: relative;
+}
+
+.photo-preview {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    display: block;
+}
+
+.badge-principale {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    background: rgba(192, 120, 74, 0.9);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+}
+
+.photo-actions {
+    display: flex;
+    gap: 3px;
+    padding: 0.45rem 0.5rem;
+}
+
+/* Ajout de photo */
+.add-photo-form {
+    margin-top: 0.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px dashed #e0ddd6;
+}
+
+.add-photo-title {
+    margin-bottom: 0.75rem;
+}
+
+.add-photo-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-width: 440px;
+}
+
+.btn-add-photo {
+    display: inline-block;
+    width: auto;
+    margin-top: 0.35rem;
+    padding: 0.55rem 1.5rem;
+    font-size: 0.95rem;
+}
+
+/* ============================================================
+   Réservations — navigation date, cartes, statuts
+   ============================================================ */
+
+/* Navigation par date */
+.date-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+}
+
+.date-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.45rem 0.85rem;
+    border: 1px solid #d4d0c8;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #444;
+    text-decoration: none;
+    background: #faf9f7;
+    white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.date-nav-btn:hover {
+    background: #e8e4dc;
+    border-color: #b8b4ac;
+}
+
+.date-nav-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.date-nav-input {
+    padding: 0.45rem 0.75rem;
+    border: 1px solid #d4d0c8;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: #2d2d2d;
+    background: #faf9f7;
+    cursor: pointer;
+}
+
+.date-nav-input:focus {
+    outline: none;
+    border-color: #c0784a;
+    box-shadow: 0 0 0 3px rgba(192, 120, 74, 0.15);
+}
+
+.date-nav-today {
+    font-size: 0.85rem;
+    color: #c0784a;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.2rem 0;
+}
+
+.date-nav-today:hover {
+    text-decoration: underline;
+}
+
+/* En-tête de date */
+.date-group-header {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f0ede6;
+}
+
+.date-label-principal {
+    display: block;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.date-label-principal.date-label--today {
+    color: #c0784a;
+}
+
+.date-label-secondaire {
+    display: block;
+    font-size: 0.9rem;
+    color: #888;
+    margin-top: 0.15rem;
+}
+
+/* Compteur de réservations */
+.reservations-count {
+    font-size: 0.88rem;
+    color: #888;
+    margin-bottom: 0.85rem;
+}
+
+/* Liste des cartes */
+.reservations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+/* Carte de réservation */
+.reservation-card {
+    border: 1px solid #e8e4dc;
+    border-left: 4px solid #d4d0c8;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    background: #fff;
+}
+
+.reservation-card--en_attente {
+    border-left-color: #e6a817;
+}
+
+.reservation-card--confirmee {
+    border-left-color: #2e9e62;
+}
+
+.reservation-card--annulee {
+    border-left-color: #ccc;
+    background: #faf9f7;
+}
+
+/* En-tête de carte : heure + badge */
+.res-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.55rem;
+}
+
+.res-time {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+    letter-spacing: 0.01em;
+}
+
+/* Badges statut réservation */
+.badge-statut {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid transparent;
+}
+
+.badge-statut--en_attente {
+    background-color: #fef3cd;
+    border-color: #e6a817;
+    color: #7a5800;
+}
+
+.badge-statut--confirmee {
+    background-color: #edfaf3;
+    border-color: #a8dfc0;
+    color: #1a5c38;
+}
+
+.badge-statut--annulee {
+    background-color: #f5f4f0;
+    border-color: #d4d0c8;
+    color: #888;
+}
+
+/* Détails client */
+.res-body {
+    font-size: 0.95rem;
+    color: #444;
+    margin-bottom: 0.4rem;
+}
+
+.res-client-name {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.res-separator {
+    color: #ccc;
+    margin: 0 0.35rem;
+}
+
+.res-tel {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Notes */
+.res-notes {
+    font-size: 0.88rem;
+    color: #666;
+    font-style: italic;
+    background: #faf9f7;
+    border-left: 3px solid #e0ddd6;
+    padding: 0.35rem 0.75rem;
+    margin: 0.5rem 0 0;
+    border-radius: 0 4px 4px 0;
+}
+
+/* Actions */
+.res-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.85rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f0ede6;
+}
+
+/* Bouton succès (Confirmer) */
+.btn-success {
+    background: #edfaf3;
+    border-color: #a8dfc0;
+    color: #1a5c38;
+}
+
+.btn-success:hover {
+    background: #d6f0e4;
+    border-color: #7dcc9e;
+}
+
+/* ============================================================
+   Notifications WhatsApp (admin/reservations.php)
+   Deux flux distincts, visuellement différenciés :
+   - Flux A (btn-wa-resto)  : notification interne → numéro du restaurant
+   - Flux B (btn-wa-client) : notification client  → téléphone du client
+============================================================= */
+
+.res-whatsapp {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+    border-top: 1px dashed #e0ddd6;
+}
+
+/* Flux A — brun chaud, "pour moi" */
+.btn-wa-resto {
+    background: #faf3e8;
+    border: 1px solid #d4a96a;
+    color: #6b3d0f;
+    border-radius: 4px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.15s;
+}
+.btn-wa-resto:hover {
+    background: #f0e2c8;
+}
+
+/* Flux B — vert WhatsApp, "pour le client" */
+.btn-wa-client {
+    background: #e8f5e9;
+    border: 1px solid #81c784;
+    color: #1b5e20;
+    border-radius: 4px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.15s;
+}
+.btn-wa-client:hover {
+    background: #c8e6c9;
+}
+
+/* Invite lorsque le numéro WhatsApp restaurant n'est pas encore configuré */
+.res-wa-hint {
+    font-size: 0.8rem;
+    color: #aaa;
+    font-style: italic;
+}
+.res-wa-hint a {
+    color: #b08055;
+}
