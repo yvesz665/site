@@ -66,7 +66,7 @@ if (!$bloque && empty($erreurs) && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['admin_email']   = $email;
                 $_SESSION['restaurant_id'] = $restaurantId;
 
-                header('Location: /admin/dashboard.php');
+                header('Location: /admin/restaurant.php');
                 exit;
             } catch (Exception $e) {
                 error_log('[inscription] INSERT admin_users : ' . $e->getMessage());

@@ -185,3 +185,263 @@ h1 {
 .auth-link a:hover {
     text-decoration: underline;
 }
+
+/* ============================================================
+   Panneau d'administration — layout général
+   ============================================================ */
+
+.panel-wrapper {
+    min-height: 100vh;
+    background-color: #f5f4f0;
+    padding: 2rem 1rem;
+}
+
+.panel-card {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+    padding: 2rem 2.5rem;
+    max-width: 780px;
+    margin: 0 auto;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f0ede6;
+}
+
+.panel-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+    text-align: left;
+}
+
+.lien-retour {
+    font-size: 0.88rem;
+    color: #c0784a;
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.lien-retour:hover {
+    text-decoration: underline;
+}
+
+/* ---------------------------------------------------------------
+   Sections de formulaire
+--------------------------------------------------------------- */
+
+.form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #f0ede6;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+.form-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1.25rem;
+}
+
+.form-section-title .hint {
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+/* Ligne à deux colonnes */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 600px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Champ requis */
+.required {
+    color: #c0392b;
+    font-weight: 700;
+}
+
+.required-note {
+    font-size: 0.82rem;
+    color: #888;
+    margin: 0;
+}
+
+/* Aide sous un champ */
+.field-help {
+    margin-top: 0.35rem;
+    font-size: 0.82rem;
+    color: #888;
+}
+
+/* Color picker */
+.color-picker-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.color-picker-wrapper input[type="color"] {
+    width: 48px;
+    height: 36px;
+    padding: 2px;
+    border: 1px solid #d4d0c8;
+    border-radius: 6px;
+    cursor: pointer;
+    background: none;
+}
+
+.color-hint {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+/* Logo preview */
+.logo-preview {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-preview img {
+    max-height: 80px;
+    max-width: 200px;
+    border-radius: 6px;
+    border: 1px solid #e0ddd6;
+    object-fit: contain;
+    padding: 4px;
+    background: #faf9f7;
+}
+
+/* File input */
+input[type="file"] {
+    display: block;
+    padding: 0.5rem 0;
+    font-size: 0.92rem;
+    color: #444;
+}
+
+/* ---------------------------------------------------------------
+   Grille horaires
+--------------------------------------------------------------- */
+
+.horaires-grid {
+    display: grid;
+    grid-template-columns: 110px 60px 1fr 1fr;
+    gap: 0.6rem 0.75rem;
+    align-items: center;
+}
+
+.horaires-header {
+    display: contents;
+}
+
+.horaires-header span {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid #e8e4dc;
+}
+
+.horaires-row {
+    display: contents;
+}
+
+.jour-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.toggle-label {
+    display: flex;
+    justify-content: center;
+}
+
+.toggle-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #c0784a;
+    cursor: pointer;
+}
+
+.time-input {
+    padding: 0.4rem 0.5rem;
+    border: 1px solid #d4d0c8;
+    border-radius: 5px;
+    font-size: 0.92rem;
+    color: #2d2d2d;
+    background: #faf9f7;
+    width: 100%;
+}
+
+.time-input:disabled {
+    background: #f0ede6;
+    color: #bbb;
+    border-color: #e0ddd6;
+    cursor: not-allowed;
+}
+
+.time-input:focus {
+    outline: none;
+    border-color: #c0784a;
+    box-shadow: 0 0 0 3px rgba(192, 120, 74, 0.15);
+}
+
+/* ---------------------------------------------------------------
+   Pied du formulaire
+--------------------------------------------------------------- */
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f0ede6;
+}
+
+.form-actions .btn-primary {
+    width: auto;
+    padding: 0.7rem 2rem;
+    margin-top: 0;
+}
+
+/* ---------------------------------------------------------------
+   Alerte succès
+--------------------------------------------------------------- */
+
+.alert-success {
+    background-color: #edfaf3;
+    border: 1px solid #a8dfc0;
+    color: #1a5c38;
+}
+
+.alert-success a {
+    color: #1a5c38;
+    font-weight: 600;
+}
