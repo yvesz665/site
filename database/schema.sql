@@ -64,7 +64,10 @@ CREATE TABLE IF NOT EXISTS `plats` (
     -- DECIMAL(8,2) : évite les erreurs d'arrondi flottant sur les prix.
     -- Supporte jusqu'à 999 999,99 — largement suffisant.
     `prix`         DECIMAL(8,2)  NOT NULL,
-    `photo_path`   VARCHAR(500)      NULL DEFAULT NULL,
+    -- Pas de colonne photo_path ici : les photos sont gérées dans la table plat_photos
+    -- (galerie multi-photos). Pour afficher une vignette dans une liste, le code applicatif
+    -- récupère la première ligne de plat_photos ORDER BY ordre_affichage ASC LIMIT 1.
+    -- Ce choix évite de maintenir deux systèmes redondants (colonne unique + galerie).
     `disponible`   TINYINT(1)    NOT NULL DEFAULT 1
                        COMMENT '1 = disponible à la commande, 0 = masqué sur le menu public',
     `created_at`   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -83,6 +86,38 @@ CREATE TABLE IF NOT EXISTS `plats` (
     -- Index composite categorie+disponibilite : requête typique du menu public
     -- "SELECT * FROM plats WHERE categorie_id = ? AND disponible = 1"
     INDEX `idx_plats_categorie_dispo` (`categorie_id`, `disponible`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ------------------------------------------------------------
+-- Table : plat_photos
+-- Galerie de photos par plat (remplace la colonne photo_path unique).
+-- La première photo (ordre_affichage = valeur la plus basse) sert
+-- de photo principale / vignette dans les listes du menu public.
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `plat_photos` (
+    `id`              INT UNSIGNED     NOT NULL AUTO_INCREMENT,
+    `plat_id`         INT UNSIGNED     NOT NULL,
+    `photo_path`      VARCHAR(500)     NOT NULL,
+    `ordre_affichage` SMALLINT UNSIGNED NOT NULL DEFAULT 0
+                          COMMENT 'Ordre dans la galerie — la valeur la plus basse = photo principale',
+    `created_at`      DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    -- ON DELETE CASCADE : si le plat est supprimé, ses photos n'ont plus de sens.
+    -- Ce CASCADE ne contredit pas les RESTRICT existants dans la chaîne :
+    --   • plats→categories RESTRICT bloque la suppression d'une catégorie non vide
+    --     (ne concerne pas la suppression d'un plat).
+    --   • commande_lignes→plats RESTRICT bloque la suppression d'un plat commandé.
+    -- Si ce dernier RESTRICT s'oppose à la suppression du plat, ce CASCADE ne
+    -- s'exécute jamais. Si la suppression du plat réussit (aucune commande liée),
+    -- les photos sont supprimées avec lui — comportement voulu.
+    CONSTRAINT `fk_plat_photos_plat`
+        FOREIGN KEY (`plat_id`) REFERENCES `plats` (`id`)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    -- Index composite (plat_id, ordre_affichage) : utilisé par la requête
+    -- "SELECT * FROM plat_photos WHERE plat_id = ? ORDER BY ordre_affichage ASC"
+    -- aussi bien pour afficher la galerie complète que pour récupérer la vignette.
+    INDEX `idx_plat_photos_plat_ordre` (`plat_id`, `ordre_affichage`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
