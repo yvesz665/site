@@ -229,9 +229,17 @@ $csrfToken = generateCsrfToken();
                     $nbLignes    = count($cmd['lignes']);
                     $totalFormat = number_format((float) $cmd['total'], 2, ',', "\xc2\xa0");
 
-                    // Flux 2 : lien WhatsApp vers le client, selon le statut actuel
-                    // (null pour en_attente — pas d'événement client à ce stade)
-                    $lienWaClient = buildWhatsappCommandeStatutClientLink($cmd, $statut, $nomRestaurant);
+                    // Pré-génère les liens WhatsApp pour tous les statuts applicables.
+                    // Stockés en JSON sur le bouton, JS met à jour le href quand
+                    // l'utilisateur change le select — sans rechargement de page.
+                    $liensWaParStatut = [];
+                    foreach (['confirmee', 'en_preparation', 'prete', 'livree', 'annulee'] as $s) {
+                        $lien = buildWhatsappCommandeStatutClientLink($cmd, $s, $nomRestaurant);
+                        if ($lien !== null) {
+                            $liensWaParStatut[$s] = $lien;
+                        }
+                    }
+                    $lienWaActuel = $liensWaParStatut[$statut] ?? null;
                 ?>
                 <div class="commande-card commande-card--<?= h($statut) ?>">
 
@@ -310,7 +318,7 @@ $csrfToken = generateCsrfToken();
                         <input type="hidden" name="csrf_token"    value="<?= h($csrfToken) ?>">
                         <input type="hidden" name="commande_id"   value="<?= (int) $cmd['id'] ?>">
                         <input type="hidden" name="date_courante" value="<?= h($dateSelectionnee) ?>">
-                        <select name="nouveau_statut" class="select-statut">
+                        <select name="nouveau_statut" class="select-statut" data-cmd-id="<?= (int) $cmd['id'] ?>">
                             <?php foreach ($labelsStatut as $val => $lbl): ?>
                                 <option value="<?= h($val) ?>"<?= $statut === $val ? ' selected' : '' ?>>
                                     <?= h($lbl) ?>
@@ -327,13 +335,16 @@ $csrfToken = generateCsrfToken();
                            noopener   → empêche la page ouverte d'accéder à window.opener.
                            noreferrer → supprime l'en-tête Referer envoyé à wa.me
                                         (confidentialité de l'URL admin). -->
-                    <?php if ($lienWaClient !== null): ?>
+                    <?php if (!empty($liensWaParStatut)): ?>
                         <div class="res-whatsapp">
-                            <a href="<?= h($lienWaClient) ?>"
+                            <a id="wa-notif-<?= (int) $cmd['id'] ?>"
+                               href="<?= h($lienWaActuel ?? '#') ?>"
+                               <?= $lienWaActuel === null ? 'style="display:none"' : '' ?>
                                class="btn-sm btn-wa-client"
+                               data-liens="<?= h(json_encode($liensWaParStatut)) ?>"
                                target="_blank"
                                rel="noopener noreferrer"
-                               title="Ouvre WhatsApp avec un message destiné au client de cette commande">
+                               title="Ouvre WhatsApp avec un message pour le statut sélectionné">
                                 Notifier le client sur WhatsApp
                             </a>
                         </div>
@@ -346,5 +357,21 @@ $csrfToken = generateCsrfToken();
 
     </div>
 </div>
+<script>
+// Synchronise le lien WhatsApp avec le statut sélectionné dans le <select>.
+// Les URLs sont pré-calculées côté PHP (data-liens JSON) pour chaque statut
+// applicable — le clic "Notifier" utilise toujours le statut affiché dans le select,
+// qu'il ait été enregistré ou non.
+document.querySelectorAll('.select-statut').forEach(function (sel) {
+    sel.addEventListener('change', function () {
+        var btn = document.getElementById('wa-notif-' + this.dataset.cmdId);
+        if (!btn) return;
+        var liens = JSON.parse(btn.dataset.liens || '{}');
+        var lien  = liens[this.value] || null;
+        btn.href         = lien || '#';
+        btn.style.display = lien ? '' : 'none';
+    });
+});
+</script>
 </body>
 </html>
