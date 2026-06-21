@@ -13,8 +13,10 @@ if (!function_exists('h')) {
     }
 }
 
-$restaurantId = (int) $_SESSION['restaurant_id'];
-$erreurs      = [];
+$restaurantId  = (int) $_SESSION['restaurant_id'];
+$erreurs       = [];
+$restaurant    = getRestaurantData();
+$nomRestaurant = (string) ($restaurant['nom'] ?? '');
 
 // -----------------------------------------------------------------------
 // Libellés des statuts et modes (référence unique, réutilisée partout)
@@ -222,10 +224,14 @@ $csrfToken = generateCsrfToken();
             </p>
             <div class="commandes-list">
                 <?php foreach ($commandes as $cmd):
-                    $statut     = $cmd['statut'];
-                    $heure      = substr((string) $cmd['created_at'], 11, 5);
-                    $nbLignes   = count($cmd['lignes']);
+                    $statut      = $cmd['statut'];
+                    $heure       = substr((string) $cmd['created_at'], 11, 5);
+                    $nbLignes    = count($cmd['lignes']);
                     $totalFormat = number_format((float) $cmd['total'], 2, ',', "\xc2\xa0");
+
+                    // Flux 2 : lien WhatsApp vers le client, selon le statut actuel
+                    // (null pour en_attente — pas d'événement client à ce stade)
+                    $lienWaClient = buildWhatsappCommandeStatutClientLink($cmd, $statut, $nomRestaurant);
                 ?>
                 <div class="commande-card commande-card--<?= h($statut) ?>">
 
@@ -313,6 +319,25 @@ $csrfToken = generateCsrfToken();
                         </select>
                         <button type="submit" class="btn-sm btn-primary">Enregistrer</button>
                     </form>
+
+                    <!-- Flux 2 : notifier le client du statut actuel de sa commande
+                         Bouton indépendant du formulaire de changement de statut —
+                         le restaurateur peut le cliquer à tout moment, même après coup.
+                         target="_blank" + rel="noopener noreferrer" :
+                           noopener   → empêche la page ouverte d'accéder à window.opener.
+                           noreferrer → supprime l'en-tête Referer envoyé à wa.me
+                                        (confidentialité de l'URL admin). -->
+                    <?php if ($lienWaClient !== null): ?>
+                        <div class="res-whatsapp">
+                            <a href="<?= h($lienWaClient) ?>"
+                               class="btn-sm btn-wa-client"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               title="Ouvre WhatsApp avec un message destiné au client de cette commande">
+                                Notifier le client sur WhatsApp
+                            </a>
+                        </div>
+                    <?php endif; ?>
 
                 </div>
                 <?php endforeach; ?>
