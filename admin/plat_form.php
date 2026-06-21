@@ -517,7 +517,7 @@ require __DIR__ . '/includes/layout_header.php';
                 <div class="form-group">
                     <label for="prix">
                         Prix <span class="required">*</span>
-                        <span class="hint">(€, ex : 12.50)</span>
+                        <span class="hint">(F CFA, ex : 1500)</span>
                     </label>
                     <input type="text" id="prix" name="prix"
                            value="<?= h($vals['prix']) ?>"

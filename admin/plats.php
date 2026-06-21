@@ -265,7 +265,7 @@ require __DIR__ . '/includes/layout_header.php';
 
                     <td class="col-categorie"><?= h($plat['categorie_nom']) ?></td>
 
-                    <td class="col-prix"><?= number_format((float) $plat['prix'], 2, ',', ' ') ?> €</td>
+                    <td class="col-prix"><?= number_format((float) $plat['prix'], 0, ',', ' ') ?> F CFA</td>
 
                     <td class="col-dispo">
                         <form method="post" action="/admin/plats.php" class="form-btn-inline">
