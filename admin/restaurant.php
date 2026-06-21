@@ -203,34 +203,28 @@ $valEmail    = h((string) ($r['email']            ?? ''));
 $valCouleur  = h((string) ($r['couleur_principale'] ?? '#FF6B35'));
 $valLogoPath = (string) ($r['logo_path']            ?? '');
 $valWhatsapp = h((string) ($r['whatsapp_numero']  ?? ''));
-?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fiche restaurant — Administration</title>
-    <link rel="stylesheet" href="/public/css/admin.css">
-</head>
-<body>
-<div class="panel-wrapper">
-    <div class="panel-card">
 
-        <div class="panel-header">
-            <h1>Fiche du restaurant</h1>
+// Tout traitement POST terminé — aucune redirection possible après cette ligne.
+// restaurant.php n'appelle pas requireRestaurantConfigured() — la sidebar s'affiche
+// même lors de la première configuration du restaurant.
+$page_actuelle = 'restaurant';
+$titre_page    = 'Fiche restaurant';
+require __DIR__ . '/includes/layout_header.php';
+?>
+<div class="panel-card">
+
+    <div class="panel-header">
+        <h1>Fiche du restaurant</h1>
+    </div>
+
+    <?php if ($succes): ?>
+        <div class="alert alert-success">
+            Informations sauvegardées avec succès.
             <?php if (isRestaurantConfigured()): ?>
-                <a href="/admin/dashboard.php" class="lien-retour">← Tableau de bord</a>
+                <a href="/admin/dashboard.php">Accéder au tableau de bord →</a>
             <?php endif; ?>
         </div>
-
-        <?php if ($succes): ?>
-            <div class="alert alert-success">
-                Informations sauvegardées avec succès.
-                <?php if (isRestaurantConfigured()): ?>
-                    <a href="/admin/dashboard.php">Accéder au tableau de bord →</a>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
+    <?php endif; ?>
 
         <?php if (!empty($erreurs)): ?>
             <div class="alert alert-error">
@@ -396,8 +390,7 @@ $valWhatsapp = h((string) ($r['whatsapp_numero']  ?? ''));
                 <button type="submit" class="btn-primary">Enregistrer</button>
             </div>
 
-        </form>
-    </div>
+    </form>
 </div>
 
 <script>
@@ -407,5 +400,4 @@ function toggleHoraires(jour) {
     });
 }
 </script>
-</body>
-</html>
+<?php require __DIR__ . '/includes/layout_footer.php'; ?>

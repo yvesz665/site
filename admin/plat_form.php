@@ -447,228 +447,222 @@ if ($modeEdition && $plat !== null && !empty($erreurs)) {
 $nbPhotos   = count($photos);
 $csrfToken  = generateCsrfToken();
 $formAction = '/admin/plat_form.php' . ($modeEdition ? '?id=' . $platId : '');
+
+// Tout traitement POST terminé — aucune redirection possible après cette ligne.
+// page_actuelle = 'plats' : la sidebar garde "Plats" surligné même en mode édition/création
+$page_actuelle = 'plats';
+$titre_page    = $modeEdition ? 'Modifier un plat' : 'Ajouter un plat';
+require __DIR__ . '/includes/layout_header.php';
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $modeEdition ? 'Modifier un plat' : 'Ajouter un plat' ?> — Administration</title>
-    <link rel="stylesheet" href="/public/css/admin.css">
-</head>
-<body>
-<div class="panel-wrapper">
-    <div class="panel-card panel-card-lg">
+<div class="panel-card panel-card-lg">
 
-        <div class="panel-header">
-            <h1><?= $modeEdition ? 'Modifier : ' . h((string) ($plat['nom'] ?? '')) : 'Ajouter un plat' ?></h1>
-            <a href="/admin/plats.php" class="lien-retour">← Retour aux plats</a>
-        </div>
-
-        <?php if ($succes !== ''): ?>
-            <div class="alert alert-success"><?= h($succes) ?></div>
-        <?php endif; ?>
-
-        <?php if (!empty($erreurs)): ?>
-            <div class="alert alert-error">
-                <ul>
-                    <?php foreach ($erreurs as $err): ?>
-                        <li><?= h($err) ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-        <?php endif; ?>
-
-        <?php if (empty($categories)): ?>
-
-            <div class="alert alert-info">
-                Vous devez d'abord <a href="/admin/categories.php">créer au moins une catégorie</a>
-                avant de pouvoir ajouter un plat.
-            </div>
-
-        <?php else: ?>
-
-        <!-- ============================================================
-             Section 1 : Informations du plat
-        ============================================================= -->
-        <div class="form-section">
-            <h2 class="form-section-title">Informations du plat</h2>
-
-            <form method="post" action="<?= h($formAction) ?>" enctype="multipart/form-data">
-                <input type="hidden" name="csrf_token" value="<?= h($csrfToken) ?>">
-                <input type="hidden" name="action"     value="save_plat">
-
-                <div class="form-group">
-                    <label for="nom">
-                        Nom du plat <span class="required">*</span>
-                    </label>
-                    <input type="text" id="nom" name="nom"
-                           value="<?= h($vals['nom']) ?>"
-                           maxlength="255" required autofocus
-                           placeholder="Ex : Poulet rôti aux herbes">
-                </div>
-
-                <div class="form-group">
-                    <label for="description">
-                        Description <span class="hint">(facultative)</span>
-                    </label>
-                    <textarea id="description" name="description"
-                              rows="3"
-                              placeholder="Ingrédients, particularités, allergènes…"><?= h($vals['description']) ?></textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="prix">
-                            Prix <span class="required">*</span>
-                            <span class="hint">(€, ex : 12.50)</span>
-                        </label>
-                        <input type="text" id="prix" name="prix"
-                               value="<?= h($vals['prix']) ?>"
-                               inputmode="decimal"
-                               placeholder="12.50" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="categorie_id">
-                            Catégorie <span class="required">*</span>
-                        </label>
-                        <select id="categorie_id" name="categorie_id" required>
-                            <option value="">— Choisir —</option>
-                            <?php foreach ($categories as $cat): ?>
-                                <option value="<?= (int) $cat['id'] ?>"
-                                        <?= $vals['categorie_id'] === (int) $cat['id'] ? 'selected' : '' ?>>
-                                    <?= h($cat['nom']) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="label-checkbox">
-                        <input type="checkbox" name="disponible" value="1"
-                               <?= $vals['disponible'] ? 'checked' : '' ?>>
-                        Disponible à la commande
-                    </label>
-                    <p class="field-help">
-                        Si décoché, le plat est masqué sur le menu public mais conservé dans votre liste.
-                    </p>
-                </div>
-
-                <?php if (!$modeEdition): ?>
-                <div class="form-group">
-                    <label for="photo">
-                        Photo principale <span class="hint">(facultative — JPEG, PNG, WebP, max 5 Mo)</span>
-                    </label>
-                    <input type="file" id="photo" name="photo"
-                           accept="image/jpeg,image/png,image/webp">
-                    <p class="field-help">Vous pourrez ajouter d'autres photos après la création du plat.</p>
-                </div>
-                <?php endif; ?>
-
-                <div class="form-actions">
-                    <p class="required-note"><span class="required">*</span> Champs obligatoires</p>
-                    <button type="submit" class="btn-primary">
-                        <?= $modeEdition ? 'Enregistrer les modifications' : 'Créer le plat' ?>
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <?php if ($modeEdition): ?>
-        <!-- ============================================================
-             Section 2 : Galerie de photos
-        ============================================================= -->
-        <div class="form-section">
-            <h2 class="form-section-title">
-                Galerie de photos
-                <span class="hint">
-                    (<?= $nbPhotos ?>/<?= PHOTO_MAX_PAR_PLAT ?> photo<?= $nbPhotos !== 1 ? 's' : '' ?> —
-                    la première est affichée comme vignette sur le menu)
-                </span>
-            </h2>
-
-            <?php if (!empty($photos)): ?>
-                <div class="photo-gallery">
-                    <?php foreach ($photos as $i => $photo):
-                        $estPremiere     = ($i === 0);
-                        $estDerniere     = ($i === $nbPhotos - 1);
-                        $confirmDelPhoto = json_encode('Supprimer cette photo ?');
-                    ?>
-                        <div class="photo-item <?= $estPremiere ? 'photo-principale' : '' ?>">
-                            <div class="photo-preview-wrap">
-                                <img src="/public/uploads/<?= h($photo['photo_path']) ?>"
-                                     alt="Photo <?= $i + 1 ?>"
-                                     class="photo-preview">
-                                <?php if ($estPremiere): ?>
-                                    <span class="badge-principale">Principale</span>
-                                <?php endif; ?>
-                            </div>
-                            <div class="photo-actions">
-                                <form method="post" action="/admin/plat_form.php?id=<?= $platId ?>"
-                                      class="form-btn-inline">
-                                    <input type="hidden" name="csrf_token" value="<?= h($csrfToken) ?>">
-                                    <input type="hidden" name="action"     value="photo_monter">
-                                    <input type="hidden" name="photo_id"   value="<?= (int) $photo['id'] ?>">
-                                    <button type="submit" class="btn-sm btn-order"
-                                            <?= $estPremiere ? 'disabled' : '' ?>
-                                            title="Monter (déplacer vers la gauche / avant)">↑</button>
-                                </form>
-                                <form method="post" action="/admin/plat_form.php?id=<?= $platId ?>"
-                                      class="form-btn-inline">
-                                    <input type="hidden" name="csrf_token" value="<?= h($csrfToken) ?>">
-                                    <input type="hidden" name="action"     value="photo_descendre">
-                                    <input type="hidden" name="photo_id"   value="<?= (int) $photo['id'] ?>">
-                                    <button type="submit" class="btn-sm btn-order"
-                                            <?= $estDerniere ? 'disabled' : '' ?>
-                                            title="Descendre (déplacer vers la droite / après)">↓</button>
-                                </form>
-                                <form method="post" action="/admin/plat_form.php?id=<?= $platId ?>"
-                                      class="form-btn-inline"
-                                      onsubmit="return confirm(<?= $confirmDelPhoto ?>)">
-                                    <input type="hidden" name="csrf_token" value="<?= h($csrfToken) ?>">
-                                    <input type="hidden" name="action"     value="delete_photo">
-                                    <input type="hidden" name="photo_id"   value="<?= (int) $photo['id'] ?>">
-                                    <button type="submit" class="btn-sm btn-danger">Supprimer</button>
-                                </form>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php else: ?>
-                <p class="empty-state">Aucune photo. Ajoutez la photo principale ci-dessous.</p>
-            <?php endif; ?>
-
-            <?php if ($nbPhotos < PHOTO_MAX_PAR_PLAT): ?>
-                <div class="add-photo-form">
-                    <h3 class="form-section-title add-photo-title">
-                        <?= empty($photos) ? 'Ajouter la photo principale' : 'Ajouter une photo' ?>
-                    </h3>
-                    <form method="post" action="/admin/plat_form.php?id=<?= $platId ?>"
-                          enctype="multipart/form-data" class="add-photo-row">
-                        <input type="hidden" name="csrf_token" value="<?= h($csrfToken) ?>">
-                        <input type="hidden" name="action"     value="add_photo">
-                        <input type="file" name="photo" id="add_photo"
-                               accept="image/jpeg,image/png,image/webp" required>
-                        <p class="field-help">JPEG, PNG ou WebP — 5 Mo maximum</p>
-                        <div>
-                            <button type="submit" class="btn-primary btn-add-photo">Ajouter la photo</button>
-                        </div>
-                    </form>
-                </div>
-            <?php else: ?>
-                <p class="field-help" style="margin-top:1rem;">
-                    Limite de <?= PHOTO_MAX_PAR_PLAT ?> photos atteinte.
-                    Supprimez une photo pour en ajouter une nouvelle.
-                </p>
-            <?php endif; ?>
-        </div>
-        <?php endif; /* $modeEdition */ ?>
-
-        <?php endif; /* empty($categories) */ ?>
-
+    <div class="panel-header">
+        <h1><?= $modeEdition ? 'Modifier : ' . h((string) ($plat['nom'] ?? '')) : 'Ajouter un plat' ?></h1>
+        <a href="/admin/plats.php" class="lien-retour">← Retour aux plats</a>
     </div>
+
+    <?php if ($succes !== ''): ?>
+        <div class="alert alert-success"><?= h($succes) ?></div>
+    <?php endif; ?>
+
+    <?php if (!empty($erreurs)): ?>
+        <div class="alert alert-error">
+            <ul>
+                <?php foreach ($erreurs as $err): ?>
+                    <li><?= h($err) ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+
+    <?php if (empty($categories)): ?>
+
+        <div class="alert alert-info">
+            Vous devez d'abord <a href="/admin/categories.php">créer au moins une catégorie</a>
+            avant de pouvoir ajouter un plat.
+        </div>
+
+    <?php else: ?>
+
+    <!-- ============================================================
+         Section 1 : Informations du plat
+    ============================================================= -->
+    <div class="form-section">
+        <h2 class="form-section-title">Informations du plat</h2>
+
+        <form method="post" action="<?= h($formAction) ?>" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="<?= h($csrfToken) ?>">
+            <input type="hidden" name="action"     value="save_plat">
+
+            <div class="form-group">
+                <label for="nom">
+                    Nom du plat <span class="required">*</span>
+                </label>
+                <input type="text" id="nom" name="nom"
+                       value="<?= h($vals['nom']) ?>"
+                       maxlength="255" required autofocus
+                       placeholder="Ex : Poulet rôti aux herbes">
+            </div>
+
+            <div class="form-group">
+                <label for="description">
+                    Description <span class="hint">(facultative)</span>
+                </label>
+                <textarea id="description" name="description"
+                          rows="3"
+                          placeholder="Ingrédients, particularités, allergènes…"><?= h($vals['description']) ?></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="prix">
+                        Prix <span class="required">*</span>
+                        <span class="hint">(€, ex : 12.50)</span>
+                    </label>
+                    <input type="text" id="prix" name="prix"
+                           value="<?= h($vals['prix']) ?>"
+                           inputmode="decimal"
+                           placeholder="12.50" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="categorie_id">
+                        Catégorie <span class="required">*</span>
+                    </label>
+                    <select id="categorie_id" name="categorie_id" required>
+                        <option value="">— Choisir —</option>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?= (int) $cat['id'] ?>"
+                                    <?= $vals['categorie_id'] === (int) $cat['id'] ? 'selected' : '' ?>>
+                                <?= h($cat['nom']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="label-checkbox">
+                    <input type="checkbox" name="disponible" value="1"
+                           <?= $vals['disponible'] ? 'checked' : '' ?>>
+                    Disponible à la commande
+                </label>
+                <p class="field-help">
+                    Si décoché, le plat est masqué sur le menu public mais conservé dans votre liste.
+                </p>
+            </div>
+
+            <?php if (!$modeEdition): ?>
+            <div class="form-group">
+                <label for="photo">
+                    Photo principale <span class="hint">(facultative — JPEG, PNG, WebP, max 5 Mo)</span>
+                </label>
+                <input type="file" id="photo" name="photo"
+                       accept="image/jpeg,image/png,image/webp">
+                <p class="field-help">Vous pourrez ajouter d'autres photos après la création du plat.</p>
+            </div>
+            <?php endif; ?>
+
+            <div class="form-actions">
+                <p class="required-note"><span class="required">*</span> Champs obligatoires</p>
+                <button type="submit" class="btn-primary">
+                    <?= $modeEdition ? 'Enregistrer les modifications' : 'Créer le plat' ?>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <?php if ($modeEdition): ?>
+    <!-- ============================================================
+         Section 2 : Galerie de photos
+    ============================================================= -->
+    <div class="form-section">
+        <h2 class="form-section-title">
+            Galerie de photos
+            <span class="hint">
+                (<?= $nbPhotos ?>/<?= PHOTO_MAX_PAR_PLAT ?> photo<?= $nbPhotos !== 1 ? 's' : '' ?> —
+                la première est affichée comme vignette sur le menu)
+            </span>
+        </h2>
+
+        <?php if (!empty($photos)): ?>
+            <div class="photo-gallery">
+                <?php foreach ($photos as $i => $photo):
+                    $estPremiere     = ($i === 0);
+                    $estDerniere     = ($i === $nbPhotos - 1);
+                    $confirmDelPhoto = json_encode('Supprimer cette photo ?');
+                ?>
+                    <div class="photo-item <?= $estPremiere ? 'photo-principale' : '' ?>">
+                        <div class="photo-preview-wrap">
+                            <img src="/public/uploads/<?= h($photo['photo_path']) ?>"
+                                 alt="Photo <?= $i + 1 ?>"
+                                 class="photo-preview">
+                            <?php if ($estPremiere): ?>
+                                <span class="badge-principale">Principale</span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="photo-actions">
+                            <form method="post" action="/admin/plat_form.php?id=<?= $platId ?>"
+                                  class="form-btn-inline">
+                                <input type="hidden" name="csrf_token" value="<?= h($csrfToken) ?>">
+                                <input type="hidden" name="action"     value="photo_monter">
+                                <input type="hidden" name="photo_id"   value="<?= (int) $photo['id'] ?>">
+                                <button type="submit" class="btn-sm btn-order"
+                                        <?= $estPremiere ? 'disabled' : '' ?>
+                                        title="Monter (déplacer vers la gauche / avant)">↑</button>
+                            </form>
+                            <form method="post" action="/admin/plat_form.php?id=<?= $platId ?>"
+                                  class="form-btn-inline">
+                                <input type="hidden" name="csrf_token" value="<?= h($csrfToken) ?>">
+                                <input type="hidden" name="action"     value="photo_descendre">
+                                <input type="hidden" name="photo_id"   value="<?= (int) $photo['id'] ?>">
+                                <button type="submit" class="btn-sm btn-order"
+                                        <?= $estDerniere ? 'disabled' : '' ?>
+                                        title="Descendre (déplacer vers la droite / après)">↓</button>
+                            </form>
+                            <form method="post" action="/admin/plat_form.php?id=<?= $platId ?>"
+                                  class="form-btn-inline"
+                                  onsubmit="return confirm(<?= $confirmDelPhoto ?>)">
+                                <input type="hidden" name="csrf_token" value="<?= h($csrfToken) ?>">
+                                <input type="hidden" name="action"     value="delete_photo">
+                                <input type="hidden" name="photo_id"   value="<?= (int) $photo['id'] ?>">
+                                <button type="submit" class="btn-sm btn-danger">Supprimer</button>
+                            </form>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <p class="empty-state">Aucune photo. Ajoutez la photo principale ci-dessous.</p>
+        <?php endif; ?>
+
+        <?php if ($nbPhotos < PHOTO_MAX_PAR_PLAT): ?>
+            <div class="add-photo-form">
+                <h3 class="form-section-title add-photo-title">
+                    <?= empty($photos) ? 'Ajouter la photo principale' : 'Ajouter une photo' ?>
+                </h3>
+                <form method="post" action="/admin/plat_form.php?id=<?= $platId ?>"
+                      enctype="multipart/form-data" class="add-photo-row">
+                    <input type="hidden" name="csrf_token" value="<?= h($csrfToken) ?>">
+                    <input type="hidden" name="action"     value="add_photo">
+                    <input type="file" name="photo" id="add_photo"
+                           accept="image/jpeg,image/png,image/webp" required>
+                    <p class="field-help">JPEG, PNG ou WebP — 5 Mo maximum</p>
+                    <div>
+                        <button type="submit" class="btn-primary btn-add-photo">Ajouter la photo</button>
+                    </div>
+                </form>
+            </div>
+        <?php else: ?>
+            <p class="field-help" style="margin-top:1rem;">
+                Limite de <?= PHOTO_MAX_PAR_PLAT ?> photos atteinte.
+                Supprimez une photo pour en ajouter une nouvelle.
+            </p>
+        <?php endif; ?>
+    </div>
+    <?php endif; /* $modeEdition */ ?>
+
+    <?php endif; /* empty($categories) */ ?>
+
 </div>
-</body>
-</html>
+<?php require __DIR__ . '/includes/layout_footer.php'; ?>

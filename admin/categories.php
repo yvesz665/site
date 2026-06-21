@@ -244,147 +244,140 @@ if ($modifierId > 0) {
 }
 
 $csrfToken = generateCsrfToken();
+
+// Tout traitement POST terminé — aucune redirection possible après cette ligne.
+// L'include du layout peut maintenant être appelé en toute sécurité.
+$page_actuelle = 'categories';
+$titre_page    = 'Catégories du menu';
+require __DIR__ . '/includes/layout_header.php';
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catégories — Administration</title>
-    <link rel="stylesheet" href="/public/css/admin.css">
-</head>
-<body>
-<div class="panel-wrapper">
-    <div class="panel-card">
+<div class="panel-card">
 
-        <div class="panel-header">
-            <h1>Catégories du menu</h1>
-            <a href="/admin/dashboard.php" class="lien-retour">← Tableau de bord</a>
-        </div>
-
-        <?php if ($succes !== ''): ?>
-            <div class="alert alert-success"><?= h($succes) ?></div>
-        <?php endif; ?>
-
-        <?php if (!empty($erreurs)): ?>
-            <div class="alert alert-error">
-                <ul>
-                    <?php foreach ($erreurs as $err): ?>
-                        <li><?= h($err) ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-        <?php endif; ?>
-
-        <!-- ============================================================
-             Formulaire ajout / modification
-             Si ?modifier=ID : affiche le formulaire pré-rempli en mode
-             édition. Sinon : affiche le formulaire d'ajout vide.
-        ============================================================= -->
-        <div class="form-section">
-            <?php if ($categorieEnEdition): ?>
-                <h2 class="form-section-title">Modifier la catégorie</h2>
-                <form method="post" action="/admin/categories.php" class="form-inline-add">
-                    <input type="hidden" name="csrf_token"    value="<?= h($csrfToken) ?>">
-                    <input type="hidden" name="action"        value="modifier">
-                    <input type="hidden" name="categorie_id"  value="<?= (int) $categorieEnEdition['id'] ?>">
-                    <div class="add-row">
-                        <input type="text" name="nom"
-                               value="<?= h($categorieEnEdition['nom']) ?>"
-                               maxlength="255" required autofocus
-                               placeholder="Nom de la catégorie">
-                        <button type="submit" class="btn-primary">Enregistrer</button>
-                        <a href="/admin/categories.php" class="btn-secondary">Annuler</a>
-                    </div>
-                </form>
-            <?php else: ?>
-                <h2 class="form-section-title">Ajouter une catégorie</h2>
-                <form method="post" action="/admin/categories.php" class="form-inline-add">
-                    <input type="hidden" name="csrf_token" value="<?= h($csrfToken) ?>">
-                    <input type="hidden" name="action"     value="ajouter">
-                    <div class="add-row">
-                        <input type="text" name="nom"
-                               maxlength="255" required
-                               placeholder="Ex : Entrées, Plats, Desserts…">
-                        <button type="submit" class="btn-primary">Ajouter</button>
-                    </div>
-                </form>
-            <?php endif; ?>
-        </div>
-
-        <!-- ============================================================
-             Liste des catégories
-        ============================================================= -->
-        <div class="form-section">
-            <h2 class="form-section-title">Liste des catégories</h2>
-
-            <?php if ($nbCategories === 0): ?>
-                <p class="empty-state">Aucune catégorie pour l'instant. Ajoutez-en une ci-dessus.</p>
-
-            <?php else: ?>
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th class="col-ordre">Ordre</th>
-                            <th>Nom</th>
-                            <th class="col-actions">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($categories as $i => $cat):
-                            $estPremiere = ($i === 0);
-                            $estDerniere = ($i === $nbCategories - 1);
-                            $confirmMsg  = json_encode(
-                                'Supprimer la catégorie « ' . $cat['nom'] . ' » ? Cette action est irréversible.'
-                            );
-                        ?>
-                        <tr>
-                            <td class="col-ordre">
-                                <!-- Monter -->
-                                <form method="post" action="/admin/categories.php" class="form-btn-inline">
-                                    <input type="hidden" name="csrf_token"   value="<?= h($csrfToken) ?>">
-                                    <input type="hidden" name="action"       value="monter">
-                                    <input type="hidden" name="categorie_id" value="<?= (int) $cat['id'] ?>">
-                                    <button type="submit" class="btn-sm btn-order"
-                                            <?= $estPremiere ? 'disabled' : '' ?>
-                                            title="Monter">↑</button>
-                                </form>
-                                <!-- Descendre -->
-                                <form method="post" action="/admin/categories.php" class="form-btn-inline">
-                                    <input type="hidden" name="csrf_token"   value="<?= h($csrfToken) ?>">
-                                    <input type="hidden" name="action"       value="descendre">
-                                    <input type="hidden" name="categorie_id" value="<?= (int) $cat['id'] ?>">
-                                    <button type="submit" class="btn-sm btn-order"
-                                            <?= $estDerniere ? 'disabled' : '' ?>
-                                            title="Descendre">↓</button>
-                                </form>
-                            </td>
-
-                            <td class="td-nom"><?= h($cat['nom']) ?></td>
-
-                            <td class="col-actions">
-                                <!-- Modifier : GET link, pas de form -->
-                                <a href="/admin/categories.php?modifier=<?= (int) $cat['id'] ?>"
-                                   class="btn-sm btn-secondary">Modifier</a>
-
-                                <!-- Supprimer -->
-                                <form method="post" action="/admin/categories.php"
-                                      class="form-btn-inline"
-                                      onsubmit="return confirm(<?= $confirmMsg ?>)">
-                                    <input type="hidden" name="csrf_token"   value="<?= h($csrfToken) ?>">
-                                    <input type="hidden" name="action"       value="supprimer">
-                                    <input type="hidden" name="categorie_id" value="<?= (int) $cat['id'] ?>">
-                                    <button type="submit" class="btn-sm btn-danger">Supprimer</button>
-                                </form>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php endif; ?>
-        </div>
-
+    <div class="panel-header">
+        <h1>Catégories du menu</h1>
     </div>
+
+    <?php if ($succes !== ''): ?>
+        <div class="alert alert-success"><?= h($succes) ?></div>
+    <?php endif; ?>
+
+    <?php if (!empty($erreurs)): ?>
+        <div class="alert alert-error">
+            <ul>
+                <?php foreach ($erreurs as $err): ?>
+                    <li><?= h($err) ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+
+    <!-- ============================================================
+         Formulaire ajout / modification
+         Si ?modifier=ID : affiche le formulaire pré-rempli en mode
+         édition. Sinon : affiche le formulaire d'ajout vide.
+    ============================================================= -->
+    <div class="form-section">
+        <?php if ($categorieEnEdition): ?>
+            <h2 class="form-section-title">Modifier la catégorie</h2>
+            <form method="post" action="/admin/categories.php" class="form-inline-add">
+                <input type="hidden" name="csrf_token"    value="<?= h($csrfToken) ?>">
+                <input type="hidden" name="action"        value="modifier">
+                <input type="hidden" name="categorie_id"  value="<?= (int) $categorieEnEdition['id'] ?>">
+                <div class="add-row">
+                    <input type="text" name="nom"
+                           value="<?= h($categorieEnEdition['nom']) ?>"
+                           maxlength="255" required autofocus
+                           placeholder="Nom de la catégorie">
+                    <button type="submit" class="btn-primary">Enregistrer</button>
+                    <a href="/admin/categories.php" class="btn-secondary">Annuler</a>
+                </div>
+            </form>
+        <?php else: ?>
+            <h2 class="form-section-title">Ajouter une catégorie</h2>
+            <form method="post" action="/admin/categories.php" class="form-inline-add">
+                <input type="hidden" name="csrf_token" value="<?= h($csrfToken) ?>">
+                <input type="hidden" name="action"     value="ajouter">
+                <div class="add-row">
+                    <input type="text" name="nom"
+                           maxlength="255" required
+                           placeholder="Ex : Entrées, Plats, Desserts…">
+                    <button type="submit" class="btn-primary">Ajouter</button>
+                </div>
+            </form>
+        <?php endif; ?>
+    </div>
+
+    <!-- ============================================================
+         Liste des catégories
+    ============================================================= -->
+    <div class="form-section">
+        <h2 class="form-section-title">Liste des catégories</h2>
+
+        <?php if ($nbCategories === 0): ?>
+            <p class="empty-state">Aucune catégorie pour l'instant. Ajoutez-en une ci-dessus.</p>
+
+        <?php else: ?>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th class="col-ordre">Ordre</th>
+                        <th>Nom</th>
+                        <th class="col-actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($categories as $i => $cat):
+                        $estPremiere = ($i === 0);
+                        $estDerniere = ($i === $nbCategories - 1);
+                        $confirmMsg  = json_encode(
+                            'Supprimer la catégorie « ' . $cat['nom'] . ' » ? Cette action est irréversible.'
+                        );
+                    ?>
+                    <tr>
+                        <td class="col-ordre">
+                            <!-- Monter -->
+                            <form method="post" action="/admin/categories.php" class="form-btn-inline">
+                                <input type="hidden" name="csrf_token"   value="<?= h($csrfToken) ?>">
+                                <input type="hidden" name="action"       value="monter">
+                                <input type="hidden" name="categorie_id" value="<?= (int) $cat['id'] ?>">
+                                <button type="submit" class="btn-sm btn-order"
+                                        <?= $estPremiere ? 'disabled' : '' ?>
+                                        title="Monter">↑</button>
+                            </form>
+                            <!-- Descendre -->
+                            <form method="post" action="/admin/categories.php" class="form-btn-inline">
+                                <input type="hidden" name="csrf_token"   value="<?= h($csrfToken) ?>">
+                                <input type="hidden" name="action"       value="descendre">
+                                <input type="hidden" name="categorie_id" value="<?= (int) $cat['id'] ?>">
+                                <button type="submit" class="btn-sm btn-order"
+                                        <?= $estDerniere ? 'disabled' : '' ?>
+                                        title="Descendre">↓</button>
+                            </form>
+                        </td>
+
+                        <td class="td-nom"><?= h($cat['nom']) ?></td>
+
+                        <td class="col-actions">
+                            <!-- Modifier : GET link, pas de form -->
+                            <a href="/admin/categories.php?modifier=<?= (int) $cat['id'] ?>"
+                               class="btn-sm btn-secondary">Modifier</a>
+
+                            <!-- Supprimer -->
+                            <form method="post" action="/admin/categories.php"
+                                  class="form-btn-inline"
+                                  onsubmit="return confirm(<?= $confirmMsg ?>)">
+                                <input type="hidden" name="csrf_token"   value="<?= h($csrfToken) ?>">
+                                <input type="hidden" name="action"       value="supprimer">
+                                <input type="hidden" name="categorie_id" value="<?= (int) $cat['id'] ?>">
+                                <button type="submit" class="btn-sm btn-danger">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+    </div>
+
 </div>
-</body>
-</html>
+<?php require __DIR__ . '/includes/layout_footer.php'; ?>

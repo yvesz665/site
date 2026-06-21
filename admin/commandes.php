@@ -134,23 +134,17 @@ $commandes   = getCommandesByDate($restaurantId, $dateSelectionnee);
 $nbCommandes = count($commandes);
 
 $csrfToken = generateCsrfToken();
-?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Commandes — Administration</title>
-    <link rel="stylesheet" href="/public/css/admin.css">
-</head>
-<body>
-<div class="panel-wrapper">
-    <div class="panel-card">
 
-        <div class="panel-header">
-            <h1>Commandes</h1>
-            <a href="/admin/dashboard.php" class="lien-retour">← Tableau de bord</a>
-        </div>
+// Tout traitement POST terminé — aucune redirection possible après cette ligne.
+$page_actuelle = 'commandes';
+$titre_page    = 'Commandes';
+require __DIR__ . '/includes/layout_header.php';
+?>
+<div class="panel-card">
+
+    <div class="panel-header">
+        <h1>Commandes</h1>
+    </div>
 
         <?php if ($succes !== ''): ?>
             <div class="alert alert-success"><?= h($succes) ?></div>
@@ -353,9 +347,8 @@ $csrfToken = generateCsrfToken();
                 </div>
                 <?php endforeach; ?>
             </div>
-        <?php endif; ?>
+    <?php endif; ?>
 
-    </div>
 </div>
 <script>
 // Synchronise le lien WhatsApp avec le statut sélectionné dans le <select>.
@@ -373,5 +366,4 @@ document.querySelectorAll('.select-statut').forEach(function (sel) {
     });
 });
 </script>
-</body>
-</html>
+<?php require __DIR__ . '/includes/layout_footer.php'; ?>

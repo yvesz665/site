@@ -1435,3 +1435,186 @@ input[type="file"] {
     color: #3a3028;
     cursor: pointer;
 }
+
+/* ============================================================
+   Layout sidebar — structure principale du panneau admin
+   ============================================================ */
+
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+    align-items: stretch;
+}
+
+/* -----------------------------------------------------------
+   Sidebar
+----------------------------------------------------------- */
+.admin-sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: #2e2824;
+    color: #e8e0d8;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.sidebar-brand {
+    padding: 1.4rem 1.25rem 1.1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-brand-name {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    word-break: break-word;
+    line-height: 1.35;
+}
+
+.sidebar-brand-name--vide {
+    color: #888;
+    font-weight: 400;
+    font-style: italic;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 0.75rem 0;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav li {
+    margin: 0;
+}
+
+.nav-link {
+    display: block;
+    padding: 0.65rem 1.25rem;
+    color: #b8aca0;
+    text-decoration: none;
+    font-size: 0.88rem;
+    border-left: 3px solid transparent;
+    transition: background 0.12s, color 0.12s;
+    line-height: 1.4;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+}
+
+.nav-link--active {
+    color: #fff;
+    background: rgba(192, 120, 74, 0.18);
+    border-left-color: #c0784a;
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 0.5rem 0 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nav-link--logout {
+    color: #8a8078;
+    font-size: 0.85rem;
+}
+
+.nav-link--logout:hover {
+    color: #e07070;
+    background: rgba(200, 60, 60, 0.08);
+}
+
+/* -----------------------------------------------------------
+   Zone de contenu principal
+----------------------------------------------------------- */
+.admin-main {
+    flex: 1;
+    min-width: 0;
+    padding: 2rem 2rem 3rem;
+    overflow-y: auto;
+}
+
+/* panel-card déjà centré (max-width + margin auto) — rien à changer */
+
+/* h1 dans les pages admin (hors auth) : aligné à gauche */
+.admin-main h1 {
+    text-align: left;
+}
+
+/* -----------------------------------------------------------
+   Responsive : sidebar en haut sur petits écrans
+----------------------------------------------------------- */
+@media (max-width: 680px) {
+    .admin-layout {
+        flex-direction: column;
+    }
+
+    .admin-sidebar {
+        width: 100%;
+        min-width: 0;
+        height: auto;
+        position: static;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .sidebar-brand {
+        padding: 0.75rem 1rem;
+        border-bottom: none;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .sidebar-nav {
+        flex: 1;
+        padding: 0;
+    }
+
+    .sidebar-nav ul {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .sidebar-footer {
+        border-top: none;
+        border-left: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 0;
+    }
+
+    .nav-link {
+        padding: 0.6rem 0.85rem;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        font-size: 0.82rem;
+    }
+
+    .nav-link--active {
+        border-left-color: transparent;
+        border-bottom-color: #c0784a;
+    }
+
+    .admin-main {
+        padding: 1.25rem 1rem 2rem;
+    }
+}
+
+/* -----------------------------------------------------------
+   Dashboard — page d'accueil
+----------------------------------------------------------- */
+.dashboard-welcome {
+    color: #6b5f55;
+    font-size: 0.95rem;
+    margin-top: 0.5rem;
+}

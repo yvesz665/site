@@ -172,142 +172,134 @@ try {
 
 $nbPlats   = count($plats);
 $csrfToken = generateCsrfToken();
+
+// Tout traitement POST terminé — aucune redirection possible après cette ligne.
+$page_actuelle = 'plats';
+$titre_page    = 'Plats du menu';
+require __DIR__ . '/includes/layout_header.php';
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plats — Administration</title>
-    <link rel="stylesheet" href="/public/css/admin.css">
-</head>
-<body>
-<div class="panel-wrapper">
-    <div class="panel-card panel-card-lg">
+<div class="panel-card panel-card-lg">
 
-        <div class="panel-header">
-            <h1>Plats du menu</h1>
-            <div class="panel-header-actions">
-                <a href="/admin/plat_form.php" class="btn-sm btn-add-plat">+ Ajouter un plat</a>
-                <a href="/admin/dashboard.php" class="lien-retour">← Tableau de bord</a>
-            </div>
+    <div class="panel-header">
+        <h1>Plats du menu</h1>
+        <div class="panel-header-actions">
+            <a href="/admin/plat_form.php" class="btn-sm btn-add-plat">+ Ajouter un plat</a>
         </div>
-
-        <?php if ($succes !== ''): ?>
-            <div class="alert alert-success"><?= h($succes) ?></div>
-        <?php endif; ?>
-
-        <?php if (!empty($erreurs)): ?>
-            <div class="alert alert-error">
-                <ul>
-                    <?php foreach ($erreurs as $err): ?>
-                        <li><?= h($err) ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-        <?php endif; ?>
-
-        <?php if (!empty($categories)): ?>
-            <form method="get" action="/admin/plats.php" class="filtre-form">
-                <label for="filtre-cat" class="filtre-label">Catégorie :</label>
-                <select id="filtre-cat" name="categorie_id"
-                        class="filtre-select" onchange="this.form.submit()">
-                    <option value="0">Toutes les catégories</option>
-                    <?php foreach ($categories as $cat): ?>
-                        <option value="<?= (int) $cat['id'] ?>"
-                                <?= $filtreCategorie === (int) $cat['id'] ? 'selected' : '' ?>>
-                            <?= h($cat['nom']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-                <noscript>
-                    <button type="submit" class="btn-sm btn-secondary">Filtrer</button>
-                </noscript>
-            </form>
-        <?php endif; ?>
-
-        <?php if ($nbPlats === 0): ?>
-            <p class="empty-state">
-                <?php if ($filtreCategorie > 0): ?>
-                    Aucun plat dans cette catégorie.
-                    <a href="/admin/plats.php">Voir tous les plats.</a>
-                <?php elseif (empty($categories)): ?>
-                    Commencez par <a href="/admin/categories.php">créer une catégorie</a>,
-                    puis ajoutez vos plats.
-                <?php else: ?>
-                    Aucun plat pour l'instant.
-                    <a href="/admin/plat_form.php">Ajouter votre premier plat.</a>
-                <?php endif; ?>
-            </p>
-        <?php else: ?>
-            <table class="admin-table plats-table">
-                <thead>
-                    <tr>
-                        <th class="col-photo">Photo</th>
-                        <th>Plat</th>
-                        <th class="col-categorie">Catégorie</th>
-                        <th class="col-prix">Prix</th>
-                        <th class="col-dispo">Dispo</th>
-                        <th class="col-actions">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($plats as $plat):
-                        $confirmMsg = json_encode(
-                            'Supprimer le plat « ' . $plat['nom'] . ' » ? Cette action est irréversible.'
-                        );
-                    ?>
-                    <tr>
-                        <td class="col-photo">
-                            <?php if ($plat['photo_principale']): ?>
-                                <img src="/public/uploads/<?= h($plat['photo_principale']) ?>"
-                                     alt="" class="plat-thumb">
-                            <?php else: ?>
-                                <div class="plat-thumb-vide"></div>
-                            <?php endif; ?>
-                        </td>
-
-                        <td class="td-nom"><?= h($plat['nom']) ?></td>
-
-                        <td class="col-categorie"><?= h($plat['categorie_nom']) ?></td>
-
-                        <td class="col-prix"><?= number_format((float) $plat['prix'], 2, ',', ' ') ?> €</td>
-
-                        <td class="col-dispo">
-                            <form method="post" action="/admin/plats.php" class="form-btn-inline">
-                                <input type="hidden" name="csrf_token"       value="<?= h($csrfToken) ?>">
-                                <input type="hidden" name="action"           value="toggle_disponible">
-                                <input type="hidden" name="plat_id"          value="<?= (int) $plat['id'] ?>">
-                                <input type="hidden" name="filtre_categorie" value="<?= $filtreCategorie ?>">
-                                <button type="submit"
-                                        class="btn-sm badge-toggle <?= $plat['disponible'] ? 'badge-dispo' : 'badge-indispo' ?>"
-                                        title="Cliquer pour <?= $plat['disponible'] ? 'désactiver' : 'activer' ?>">
-                                    <?= $plat['disponible'] ? 'Oui' : 'Non' ?>
-                                </button>
-                            </form>
-                        </td>
-
-                        <td class="col-actions">
-                            <a href="/admin/plat_form.php?id=<?= (int) $plat['id'] ?>"
-                               class="btn-sm btn-secondary">Modifier</a>
-
-                            <form method="post" action="/admin/plats.php"
-                                  class="form-btn-inline"
-                                  onsubmit="return confirm(<?= $confirmMsg ?>)">
-                                <input type="hidden" name="csrf_token"       value="<?= h($csrfToken) ?>">
-                                <input type="hidden" name="action"           value="supprimer">
-                                <input type="hidden" name="plat_id"          value="<?= (int) $plat['id'] ?>">
-                                <input type="hidden" name="filtre_categorie" value="<?= $filtreCategorie ?>">
-                                <button type="submit" class="btn-sm btn-danger">Supprimer</button>
-                            </form>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php endif; ?>
-
     </div>
+
+    <?php if ($succes !== ''): ?>
+        <div class="alert alert-success"><?= h($succes) ?></div>
+    <?php endif; ?>
+
+    <?php if (!empty($erreurs)): ?>
+        <div class="alert alert-error">
+            <ul>
+                <?php foreach ($erreurs as $err): ?>
+                    <li><?= h($err) ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($categories)): ?>
+        <form method="get" action="/admin/plats.php" class="filtre-form">
+            <label for="filtre-cat" class="filtre-label">Catégorie :</label>
+            <select id="filtre-cat" name="categorie_id"
+                    class="filtre-select" onchange="this.form.submit()">
+                <option value="0">Toutes les catégories</option>
+                <?php foreach ($categories as $cat): ?>
+                    <option value="<?= (int) $cat['id'] ?>"
+                            <?= $filtreCategorie === (int) $cat['id'] ? 'selected' : '' ?>>
+                        <?= h($cat['nom']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <noscript>
+                <button type="submit" class="btn-sm btn-secondary">Filtrer</button>
+            </noscript>
+        </form>
+    <?php endif; ?>
+
+    <?php if ($nbPlats === 0): ?>
+        <p class="empty-state">
+            <?php if ($filtreCategorie > 0): ?>
+                Aucun plat dans cette catégorie.
+                <a href="/admin/plats.php">Voir tous les plats.</a>
+            <?php elseif (empty($categories)): ?>
+                Commencez par <a href="/admin/categories.php">créer une catégorie</a>,
+                puis ajoutez vos plats.
+            <?php else: ?>
+                Aucun plat pour l'instant.
+                <a href="/admin/plat_form.php">Ajouter votre premier plat.</a>
+            <?php endif; ?>
+        </p>
+    <?php else: ?>
+        <table class="admin-table plats-table">
+            <thead>
+                <tr>
+                    <th class="col-photo">Photo</th>
+                    <th>Plat</th>
+                    <th class="col-categorie">Catégorie</th>
+                    <th class="col-prix">Prix</th>
+                    <th class="col-dispo">Dispo</th>
+                    <th class="col-actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($plats as $plat):
+                    $confirmMsg = json_encode(
+                        'Supprimer le plat « ' . $plat['nom'] . ' » ? Cette action est irréversible.'
+                    );
+                ?>
+                <tr>
+                    <td class="col-photo">
+                        <?php if ($plat['photo_principale']): ?>
+                            <img src="/public/uploads/<?= h($plat['photo_principale']) ?>"
+                                 alt="" class="plat-thumb">
+                        <?php else: ?>
+                            <div class="plat-thumb-vide"></div>
+                        <?php endif; ?>
+                    </td>
+
+                    <td class="td-nom"><?= h($plat['nom']) ?></td>
+
+                    <td class="col-categorie"><?= h($plat['categorie_nom']) ?></td>
+
+                    <td class="col-prix"><?= number_format((float) $plat['prix'], 2, ',', ' ') ?> €</td>
+
+                    <td class="col-dispo">
+                        <form method="post" action="/admin/plats.php" class="form-btn-inline">
+                            <input type="hidden" name="csrf_token"       value="<?= h($csrfToken) ?>">
+                            <input type="hidden" name="action"           value="toggle_disponible">
+                            <input type="hidden" name="plat_id"          value="<?= (int) $plat['id'] ?>">
+                            <input type="hidden" name="filtre_categorie" value="<?= $filtreCategorie ?>">
+                            <button type="submit"
+                                    class="btn-sm badge-toggle <?= $plat['disponible'] ? 'badge-dispo' : 'badge-indispo' ?>"
+                                    title="Cliquer pour <?= $plat['disponible'] ? 'désactiver' : 'activer' ?>">
+                                <?= $plat['disponible'] ? 'Oui' : 'Non' ?>
+                            </button>
+                        </form>
+                    </td>
+
+                    <td class="col-actions">
+                        <a href="/admin/plat_form.php?id=<?= (int) $plat['id'] ?>"
+                           class="btn-sm btn-secondary">Modifier</a>
+
+                        <form method="post" action="/admin/plats.php"
+                              class="form-btn-inline"
+                              onsubmit="return confirm(<?= $confirmMsg ?>)">
+                            <input type="hidden" name="csrf_token"       value="<?= h($csrfToken) ?>">
+                            <input type="hidden" name="action"           value="supprimer">
+                            <input type="hidden" name="plat_id"          value="<?= (int) $plat['id'] ?>">
+                            <input type="hidden" name="filtre_categorie" value="<?= $filtreCategorie ?>">
+                            <button type="submit" class="btn-sm btn-danger">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
+
 </div>
-</body>
-</html>
+<?php require __DIR__ . '/includes/layout_footer.php'; ?>
